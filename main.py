@@ -14,6 +14,14 @@ def combine_parameters(parameter_a, parameter_b):
     combinations.append(parameter_a.upper() + parameter_b.upper())
     return combinations
 
+def append_numbers_to_combination(parameter_a, parameter_b):
+    combinations = []
+    for i in range(0, 2500):
+        combinations.extend(combine_parameters(str(i) + parameter_a, parameter_b))
+        combinations.extend(combine_parameters(parameter_a, parameter_b + str(i)))
+    return combinations
+
+
 # Create a dictionary to store all user input
 user_inputs = {}
 
@@ -30,14 +38,17 @@ password_parameters = [
     PasswordParameter('miscellaneous or random words associated with the victim', 'random_words', True)
 ]
 
+# Get inputs from the user
 for parameter in password_parameters:
     user_input = input('Enter ' + parameter.display_value + ' of the victim ' + ('(Seperate words with semicolons / ' if parameter.allow_multiple else '(') + 'If not given, leave empty): ')
 
     if user_input.strip():
-        user_inputs[parameter.value] = user_input
+        if parameter.allow_multiple:
+            user_inputs[parameter.value] = user_input.split(';')    
+        else:
+            user_inputs[parameter.value] = user_input
 
 # Combine every word with each word (dumb test)
-
 combinations = []
 
 for user_input_a in user_inputs:
@@ -45,13 +56,18 @@ for user_input_a in user_inputs:
         parameter_a = user_inputs[user_input_a]
         parameter_b = user_inputs[user_input_b]
 
-        if not parameter_a == parameter_b:
+        # Check if parameters contains a list of values
+        if isinstance(parameter_a, list) and not isinstance(parameter_b, list):
+            for sub_parameter_a in parameter_a:
+                combinations.extend(combine_parameters(sub_parameter_a, parameter_b))
+                combinations.extend(append_numbers_to_combination(sub_parameter_a, parameter_b))
+        elif isinstance(parameter_b, list) and not isinstance(parameter_a, list):
+            for sub_parameter_b in parameter_b:
+                combinations.extend(combine_parameters(parameter_a, sub_parameter_b))
+                combinations.extend(append_numbers_to_combination(parameter_a, sub_parameter_b))
+        elif not parameter_a == parameter_b:
             combinations.extend(combine_parameters(parameter_a, parameter_b))
-
-            # Try to add numbers from 0 - 2500 / Maybe add some more logic later
-            for i in range(0, 2500):
-                combinations.extend(combine_parameters(str(i) + parameter_a, parameter_b))
-                combinations.extend(combine_parameters(parameter_a, parameter_b + str(i)))
+            combinations.extend(append_numbers_to_combination(parameter_a, parameter_b))
 
 # Output amount of passwords generated
 print(len(combinations))
