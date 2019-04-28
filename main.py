@@ -19,8 +19,6 @@ password_parameters = [
     PasswordParameter('miscellaneous or random words associated with the victim', 'random_words', True)
 ]
 
-paramters_to_ask = ['first name', 'last name', 'pet name', 'birth year', 'birth month', 'birth day', 'place of birth', '']
-
 for parameter in password_parameters:
     user_input = input('Enter ' + parameter.display_value + ' of the victim ' + ('(Seperate words with semicolons / ' if parameter.allow_multiple else '(') + 'If not given, leave empty): ')
 
